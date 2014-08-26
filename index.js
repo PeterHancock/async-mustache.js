@@ -15,11 +15,11 @@
     }
 
     AsyncMustache.async = function(fn) {
-        var result;
-        var id = uuid.v1();
+        var results = {};
+        var id = uuid.v4();
         var f = function(text, render) {
-            if (!result) {
-                var key = id + ':' + render(text);
+            var key = id + ':' + render(text);
+            if (!results[key]) {
                 var promise = asyncPromises[key];
                 if (promise) {
                     promise.then(function(data) {
@@ -33,18 +33,17 @@
                         if (err) {
                             return deferred.reject(err);
                         } else {
-                            result = data;
+                            results[key] = data;
                             return deferred.resolve(data);
                         }
                     });
                 }
                 return '[' + key + ']';
             } else {
-                return render(result);
+                return render(results[key]);
             }
         };
         return function() {
-            
             return f;
         };
     }
