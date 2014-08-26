@@ -34,12 +34,14 @@ var view = {
 var tmpl = ['Regular binding {{sync}}',
 'Async binding {{#async}}2{{/async}}',
 'Async binding {{#async}}3{{/async}}',
-'Async binding {{#async}}{{id}}{{/async}}'].join('\n');
+'Async binding {{#async}}{{id}}{{/async}}\n\n'].join('\n');
 
-AsyncMustache.render(tmpl, view, null, Mustache).then(function(output) {
+AsyncMustache.render(tmpl, view).then(function(output) {
     console.log(output);
-});
+}).then(function () {
+    //AsyncMustache.clear();
+    return AsyncMustache.render(tmpl, view).then(function(output) {
+        console.log(output);
+    });
 
-AsyncMustache.render(tmpl, view, null, Mustache).then(function(output) {
-    console.log(output);
 });
