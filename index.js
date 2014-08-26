@@ -18,7 +18,7 @@
             .then(function() {
                 return Mustache.render(template, view, partials);
             });
-    }
+    };
 
     AsyncMustache.async = function(fn) {
         var results = {};
@@ -52,6 +52,10 @@
         return function() {
             return f;
         };
+    };
+
+    AsyncMustache.clear = function() {
+        asyncPromises = {};
     }
 
     module.exports = AsyncMustache;
