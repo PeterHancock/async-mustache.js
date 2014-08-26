@@ -3,14 +3,20 @@
     var _ = require('underscore');
     var uuid = require('node-uuid');
 
-    var AsyncMustache = {};
+    var Mustache;
+
+    var AsyncMustache = function(_Mustache) {
+        Mustache = _Mustache;
+        return AsyncMustache;
+    };
+
     var asyncPromises  = {};
-    AsyncMustache.render = function(template, view, partials, Mustache, callback) {
+
+    AsyncMustache.render = function(template, view, partials) {
         var init = Mustache.render(template, view, partials);
-        console.log(init);
-        Q.all(_(asyncPromises).values())
+        return Q.all(_(asyncPromises).values())
             .then(function() {
-                callback(Mustache.render(template, view, partials));
+                return Mustache.render(template, view, partials);
             });
     }
 
