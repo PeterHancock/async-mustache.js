@@ -1,5 +1,5 @@
 var Mustache = require('mustache');
-var AsyncMustache = require('./index.js')(Mustache);
+var AsyncMustache = require('./index.js')({ Mustache: Mustache });
 var http = require('http');
 
 var view = {
@@ -10,10 +10,16 @@ var view = {
             callback(null, render(text));
         }, 0);
     }),
-    async2: AsyncMustache.async(function(text, render, callback) {
+    asyncCached: AsyncMustache.asyncCached(function(text, render, callback) {
         setTimeout(function() {
-            callback(null, 'asynchronous binding2: ' + render(text));
+            callback(null, render(text));
         }, 0);
+    }),
+    asyncFail: AsyncMustache.async(function(text, render, callback) {
+        return callback('asyncFail');
+    }),
+    asyncFailCached: AsyncMustache.asyncCached(function(text, render, callback) {
+        return callback('asyncFailCached');
     }),
     url: AsyncMustache.async(function(url, render, callback) {
         http.get(url, function(res) {
@@ -31,17 +37,25 @@ var view = {
     })
 };
 
-var tmpl = ['Regular binding {{sync}}',
-'Async binding {{#async}}2{{/async}}',
-'Async binding {{#async}}3{{/async}}',
-'Async binding {{#async}}{{id}}{{/async}}\n\n'].join('\n');
+var tmpl = ['Regular binding "{{sync}}"',
+'Async binding "{{#async}}2{{/async}}"',
+'Async binding "{{#async}}3{{/async}}"',
+'Async binding (repeat) "{{#async}}3{{/async}}"',
+'Async binding (cached) "{{#asyncCached}}4{{/asyncCached}}"',
+'Async failure "{{#asyncFail}}5{{/asyncFail}}"',
+'Async failure (cached) "{{#asyncFailCached}}6{{/asyncFailCached}}"',
+'Async binding "{{#async}}{{id}}{{/async}}"\n'].join('\n');
 
 AsyncMustache.render(tmpl, view).then(function(output) {
+    console.log('Run 1');
     console.log(output);
 }).then(function () {
     //AsyncMustache.clear();
+    console.log('Run 2');
     return AsyncMustache.render(tmpl, view).then(function(output) {
         console.log(output);
     });
 
+}).fail(function(error) {
+    console.error(error);
 });
