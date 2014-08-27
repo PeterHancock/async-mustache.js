@@ -16,6 +16,6 @@
     "browserify": "^5.10.1"
   },
   "scripts": {
-    "web": "browserify index.js -s AsyncMustache > async-mustache.js"
+    "browser-build": "browserify index.js -s AsyncMustache > async-mustache.js"
   }
 }

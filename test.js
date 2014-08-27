@@ -1,5 +1,5 @@
 var Mustache = require('mustache');
-var AsyncMustache = require('./index.js')({ Mustache: Mustache });
+var AsyncMustache = require('./index.js')({ mustache: Mustache });
 var http = require('http');
 
 var view = {
