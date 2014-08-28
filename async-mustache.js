@@ -43,8 +43,9 @@
                 return onAsyncComplete(run)
                     .then(function() {
                         scope.renderRunId = id;
-                        return scope.mustache.render.apply(scope.mustache, args);
+                        var rtn =  scope.mustache.render.apply(scope.mustache, args);
                         delete scope.runs[id];
+                        return rtn;
                     });
             } else {
                 return Q.fcall(function () {
