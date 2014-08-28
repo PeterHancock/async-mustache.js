@@ -21,7 +21,6 @@
     "karma-chrome-launcher": "^0.1.4"
   },
   "scripts": {
-    "browser-build": "browserify js/index.js -s AsyncMustache > async-mustache.js",
-    "karmae": "karma start"
+    "browser-build": "browserify js/index.js -s AsyncMustache > async-mustache.js"
   }
 }
