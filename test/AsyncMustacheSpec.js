@@ -67,4 +67,19 @@ describe("A suite", function(done) {
           });
       });
   });
+
+  it("Expect async functions to cache value across render runs", function(done) {
+      var asyncMustache = AsyncMustache({mustache: Mustache});
+      var invoke = 0;
+      var view = {
+          async: asyncMustache.async(function (text, render, callback) {
+              callback(null, '' + (++invoke));
+          }, { cache: 'never'})
+      };
+      var template = '{{#async}}{{/async}} {{#async}}{{/async}}';
+      asyncMustache.render(template, view).then(function (output) {
+          expect(output).toBe('1 2');
+          done();
+      });
+  });
 });

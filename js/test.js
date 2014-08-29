@@ -9,18 +9,18 @@ var view = {
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
-    }),
+    }, { cache:'render'}),
     asyncCached: AsyncMustache.async(function(text, render, callback) {
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
-    }, { cache: 'never' }),
+    }, { cache: 'always' }),
     asyncFail: AsyncMustache.async(function(text, render, callback) {
         return callback('asyncFail');
     }),
     asyncFailCached: AsyncMustache.async(function(text, render, callback) {
         return callback('asyncFailCached');
-    }, { cache: 'never' }),
+    }, { cache: 'always' }),
     url: AsyncMustache.async(function(url, render, callback) {
         http.get(url, function(res) {
             var str = '';
@@ -39,12 +39,14 @@ var view = {
 
 var tmpl = ['Regular binding "{{sync}}"',
 'Async binding "{{#async}}2{{/async}}"',
-'Async binding "{{#async}}3{{/async}}"',
+'Async binding "{{#async}}2{{/async}}"',
+/*'Async binding "{{#async}}3{{/async}}"',
 'Async binding (repeat) "{{#async}}3{{/async}}"',
 'Async binding (cached) "{{#asyncCached}}4{{/asyncCached}}"',
 'Async failure "{{#asyncFail}}5{{/asyncFail}}"',
 'Async failure (cached) "{{#asyncFailCached}}6{{/asyncFailCached}}"',
-'Async binding "{{#async}}{{id}}{{/async}}"\n'].join('\n');
+'Async binding "{{#async}}{{id}}{{/async}}"\n'*/
+].join('\n');
 
 AsyncMustache.render(tmpl, view).then(function(output) {
     console.log('Run 1');

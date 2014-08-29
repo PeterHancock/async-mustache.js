@@ -36,13 +36,15 @@
             var run = this.runs[id] = {
                 asyncPromises: {},
                 asyncInProgress: false,
-                results: {}
+                results: {},
+                calls : {}
             };
             var output = this.mustache.render.apply(this.mustache, args);
             if (run.asyncInProgress) {
                 return onAsyncComplete(run)
                     .then(function() {
                         scope.renderRunId = id;
+                        run.calls = {};
                         var rtn =  scope.mustache.render.apply(scope.mustache, args);
                         delete scope.runs[id];
                         return rtn;
@@ -57,45 +59,60 @@
         async: function(fn, config) {
             config = config || {};
             var cache = config.cache || 'render'; // imediate, render, never
-            if (cache === 'render') {
-                return this._async(fn);
-            } else if (cache === 'always'){
+            if (cache === 'always') {
                 return this._asyncCached(fn);
-            } else {
+            } else if (cache === 'never'){
                 return this._async(fn);
+            } else {
+                return this._asyncRenderCached(fn);
             }
         },
 
         _async: function(fn) {
             var scope = this;
-            var id = '' + (this.nextAsyncId++);
             var asyncRender = function (text, render) {
                 var run = scope.runs[scope.renderRunId];
-                var key = id + ':' + render(text);
+                var methId = asyncRender._id + ':' + render(text);
+                var call = run.calls[methId] = (run.calls[methId] ? run.calls[methId] + 1 : 1);
+                var key = methId + ':' + call;
                 if (!run.results[key]) {
-                    var promise = run.asyncPromises[key];
-                    if (!promise) {
-                        run.asyncInProgress = true;
-                        var deferred = Q.defer();
-                        promise = run.asyncPromises[key] = deferred.promise;
-                        fn(text, render,  function(err, data) {
-                            if (err) {
-                                if (scope.failOnError) {
-                                    return deferred.reject(err);
-                                } else {
-                                    return deferred.resolve('');
-                                }
+                    run.asyncInProgress = true;
+                    var deferred = Q.defer();
+                    fn(text, render,  function(err, data) {
+                        if (err) {
+                            if (scope.failOnError) {
+                                return deferred.reject(err);
                             } else {
-                                run.results[key] = data;
-                                return deferred.resolve(data);
+                                run.results[key] = '';
+                                return deferred.resolve('');
                             }
-                        });
-                    }
-                    return promise;
+                        } else {
+                            run.results[key] = data;
+                            return deferred.resolve(data);
+                        }
+                    });
+                    return run.asyncPromises[key] = deferred.promise;
                 } else {
                     return render(run.results[key]);
                 }
             };
+            asyncRender._id = '' + (this.nextAsyncId++);
+            return function () { return asyncRender };
+        },
+
+        _asyncRenderCached: function (fn) {
+            var scope = this;
+            var async = scope._async(fn)();
+            var asyncRender = function (text, render) {
+                var run = scope.runs[scope.renderRunId];
+                var key = async._id + ':' + render(text) + ':1';
+                var result = run.results[key];
+                if (result) {
+                    return result;
+                } else {
+                    return run.asyncPromises[key] || async(text, render);
+                }
+            }
             return function () { return asyncRender };
         },
 
@@ -103,17 +120,17 @@
             var scope = this;
             var result;
             var promise;
+            var async = scope._async(fn)();
             var asyncRender = function (text, render) {
                 if (result) {
                     return result;
                 } else {
-                    var p = promise = promise || scope.async(fn)()(text, render);
-                    p.then(function(data) {
+                    promise = promise || async(text, render);
+                    // Rejections are handled in render
+                    return promise.then(function(data) {
                         result = data;
                         promise = null;
                     });
-                    // Rejections are handled in render
-                    return p;
                 }
             }
             return function () { return asyncRender };
