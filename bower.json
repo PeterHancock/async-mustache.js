@@ -1,21 +1,23 @@
 {
-  "name": "async-mustache",
+  "name": "async-mustache.js",
   "main": "async-mustache.js",
   "version": "0.0.0",
+  "homepage": "https://github.com/PeterHancock/async-mustache.js",
   "authors": [
     "Peter Hancock <peter.hancock@gmail.com>"
   ],
   "description": "Asyncronous view functions",
   "keywords": [
-    "Mustache"
+    "mustache",
+    "template",
+    "async"
   ],
   "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
-    "tests"
+    "test"
   ],
   "devDependencies": {
     "mustache": "~0.8.2"

@@ -10,17 +10,17 @@ var view = {
             callback(null, render(text));
         }, 0);
     }),
-    asyncCached: AsyncMustache.asyncCached(function(text, render, callback) {
+    asyncCached: AsyncMustache.async(function(text, render, callback) {
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
-    }),
+    }, { cache: 'never' }),
     asyncFail: AsyncMustache.async(function(text, render, callback) {
         return callback('asyncFail');
     }),
-    asyncFailCached: AsyncMustache.asyncCached(function(text, render, callback) {
+    asyncFailCached: AsyncMustache.async(function(text, render, callback) {
         return callback('asyncFailCached');
-    }),
+    }, { cache: 'never' }),
     url: AsyncMustache.async(function(url, render, callback) {
         http.get(url, function(res) {
             var str = '';

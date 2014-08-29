@@ -54,7 +54,19 @@
             }
         },
 
-        async: function(fn) {
+        async: function(fn, config) {
+            config = config || {};
+            var cache = config.cache || 'render'; // imediate, render, never
+            if (cache === 'render') {
+                return this._async(fn);
+            } else if (cache === 'always'){
+                return this._asyncCached(fn);
+            } else {
+                return this._async(fn);
+            }
+        },
+
+        _async: function(fn) {
             var scope = this;
             var id = '' + (this.nextAsyncId++);
             var asyncRender = function (text, render) {
@@ -87,7 +99,7 @@
             return function () { return asyncRender };
         },
 
-        asyncCached: function (fn) {
+        _asyncCached: function (fn) {
             var scope = this;
             var result;
             var promise;
