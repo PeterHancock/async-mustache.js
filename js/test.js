@@ -5,12 +5,14 @@ var http = require('http');
 var view = {
     sync: 1,
     id: 4,
-    async: AsyncMustache.async(function(text, render, callback) {
+    async: AsyncMustache.async(function(text, render, callback, key) {
+        console.log(key);
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
     }, { cache:'render'}),
-    asyncCached: AsyncMustache.async(function(text, render, callback) {
+    asyncCached: AsyncMustache.async(function(text, render, callback, key) {
+        console.log(key);
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
@@ -40,12 +42,12 @@ var view = {
 var tmpl = ['Regular binding "{{sync}}"',
 'Async binding "{{#async}}2{{/async}}"',
 'Async binding "{{#async}}2{{/async}}"',
-/*'Async binding "{{#async}}3{{/async}}"',
+'Async binding "{{#async}}3{{/async}}"',
 'Async binding (repeat) "{{#async}}3{{/async}}"',
 'Async binding (cached) "{{#asyncCached}}4{{/asyncCached}}"',
 'Async failure "{{#asyncFail}}5{{/asyncFail}}"',
 'Async failure (cached) "{{#asyncFailCached}}6{{/asyncFailCached}}"',
-'Async binding "{{#async}}{{id}}{{/async}}"\n'*/
+'Async binding "{{#async}}{{id}}{{/async}}"\n'
 ].join('\n');
 
 AsyncMustache.render(tmpl, view).then(function(output) {

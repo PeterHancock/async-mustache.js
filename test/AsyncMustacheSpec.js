@@ -1,3 +1,9 @@
+
+if (typeof module !== 'undefined' && module.exports) {
+    AsyncMustache = require('../js/index.js');
+    Mustache = require('mustache');
+}
+
 describe("A suite", function(done) {
 
   it("Expect synchronous functions to work", function(done) {

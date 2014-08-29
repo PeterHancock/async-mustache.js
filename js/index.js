@@ -89,10 +89,12 @@
                             run.results[key] = data;
                             return deferred.resolve(data);
                         }
-                    });
+                    }, scope.renderRunId + ':' + asyncRender._id);
                     return run.asyncPromises[key] = deferred.promise;
                 } else {
-                    return render(run.results[key]);
+                    var result = run.results[key];
+                    delete run.results[key];
+                    return render(result);
                 }
             };
             asyncRender._id = '' + (this.nextAsyncId++);

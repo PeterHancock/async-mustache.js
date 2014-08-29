@@ -16,9 +16,11 @@
     "browserify": "^5.10.1",
     "karma": "^0.12.22",
     "karma-jasmine": "^0.1.5",
-    "karma-chrome-launcher": "^0.1.4"
+    "karma-chrome-launcher": "^0.1.4",
+    "jasmine-node": "^1.14.5"
   },
   "scripts": {
+    "test": "jasmine-node test",
     "browser-build": "browserify js/index.js -s AsyncMustache > async-mustache.js"
   }
 }
