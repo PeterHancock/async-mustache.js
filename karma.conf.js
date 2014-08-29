@@ -16,6 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'bower_components/mustache/mustache.js',
+      'bower_components/q/q.js',
       'async-mustache.js',
       'test/**/*Spec.js'
 

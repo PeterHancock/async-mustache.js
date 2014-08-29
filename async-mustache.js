@@ -3,17 +3,6 @@
     var extend = require('extend');
     var Q = require('q');
 
-    function onAsyncComplete(run) {
-        var promises = run.asyncPromises;
-        var list = [];
-        for (key in promises) {
-            if (promises.hasOwnProperty(key)) {
-                list.push(promises[key]);
-            }
-        }
-        return Q.all(list);
-    }
-
     var AsyncMustache = function(config) {
         if(!(this instanceof AsyncMustache)) return new AsyncMustache(config);
         extend(this, config);
@@ -34,18 +23,16 @@
             var args = arguments;
             var id = this.renderRunId = this.nextRenderId++;
             var run = this.runs[id] = {
-                asyncPromises: {},
-                asyncInProgress: false,
-                results: {},
-                calls : {},
-                scope: {}
+                promises: [],
+                methods: {},
+                callCounts: {}
             };
             var output = this.mustache.render.apply(this.mustache, args);
-            if (run.asyncInProgress) {
-                return onAsyncComplete(run)
+            if (run.promises.length > 0) {
+                return Q.all(run.promises)
                     .then(function() {
                         scope.renderRunId = id;
-                        run.calls = {};
+                        run.callCounts = {};
                         var rtn =  scope.mustache.render.apply(scope.mustache, args);
                         delete scope.runs[id];
                         return rtn;
@@ -73,30 +60,37 @@
             var scope = this;
             var asyncRender = function (text, render) {
                 var run = scope.runs[scope.renderRunId];
-                var methId = asyncRender._id + ':' + render(text);
-                run.scope[asyncRender._id] = run.scope[asyncRender._id] || {};
-                var call = run.calls[methId] = (run.calls[methId] ? run.calls[methId] + 1 : 1);
-                var key = methId + ':' + call;
-                if (!run.results.hasOwnProperty(key)) {
-                    run.asyncInProgress = true;
+                var method = run.methods[asyncRender._id] = run.methods[asyncRender._id] || {};
+                var callCounts = run.callCounts[asyncRender._id] = run.callCounts[asyncRender._id] || {};
+                var callCount = callCounts[text] = (callCounts[text] ? callCounts[text] + 1 : 1);
+                var key = text + ':' + callCount;
+                var results = method.results = method.results || {};
+                if (!results.hasOwnProperty(key)) {
                     var deferred = Q.defer();
-                    fn(text, render,  function(err, data) {
+                    var promise = deferred.promise;
+                    var callScope = {
+                        cache: method.cache = method.cache || {},
+                        runId: scope.renderRunId,
+                        callCount: callCount
+                    };
+                    fn.call(callScope, text, render, function(err, data) {
                         if (err) {
                             if (scope.failOnError) {
                                 return deferred.reject(err);
                             } else {
-                                run.results[key] = '';
+                                results[key] = '';
                                 return deferred.resolve(err);
                             }
                         } else {
-                            run.results[key] = data;
+                            results[key] = data;
                             return deferred.resolve(data);
                         }
-                    }, { cache: run.scope[asyncRender._id], id: key });
-                    return run.asyncPromises[key] = deferred.promise;
+                    });
+                    run.promises.push(promise);
+                    return promise;
                 } else {
-                    var result = run.results[key];
-                    delete run.results[key];
+                    var result = results[key];
+                    delete method.results[key];
                     return render(result);
                 }
             };
@@ -105,18 +99,18 @@
         },
 
         _asyncRenderCached: function (fn) {
-            return this._async(function(text, render, callback, scope) {
-                var promise = scope.cache[text];
+            return this._async(function(text, render, callback) {
+                var promise = this.cache[text];
                 if (!promise) {
                     var deferred = Q.defer();
-                    promise = scope.cache[text] = deferred.promise;
-                    fn(text, render, function(err, result) {
+                    promise = this.cache[text] = deferred.promise;
+                    fn.call(this, text, render, function(err, result) {
                         if (err) {
                             deferred.reject(err);
                         } else {
                             deferred.resolve(result);
                         }
-                    }, scope);
+                    });
                 }
                 promise.then(function(result) {
                     callback(null, result);
@@ -129,17 +123,17 @@
 
         _asyncCached: function (fn) {
             var promise;
-            return this._async(function(text, render, callback, scope) {
+            return this._async(function(text, render, callback) {
                 if (!promise) {
                     var deferred = Q.defer();
                     promise = deferred.promise;
-                    fn(text, render, function(err, result) {
+                    fn.call(this, text, render, function(err, result) {
                         if (err) {
                             deferred.reject(err);
                         } else {
                             deferred.resolve(result);
                         }
-                    }, scope);
+                    });
 
                 }
                 promise.then(function(result) {

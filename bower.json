@@ -20,6 +20,7 @@
     "test"
   ],
   "devDependencies": {
-    "mustache": "~0.8.2"
+    "mustache": "~0.8.2",
+    "q": "1.0.1"
   }
 }
