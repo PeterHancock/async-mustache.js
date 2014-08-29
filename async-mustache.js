@@ -37,7 +37,8 @@
                 asyncPromises: {},
                 asyncInProgress: false,
                 results: {},
-                calls : {}
+                calls : {},
+                scope: {}
             };
             var output = this.mustache.render.apply(this.mustache, args);
             if (run.asyncInProgress) {
@@ -58,7 +59,7 @@
 
         async: function(fn, config) {
             config = config || {};
-            var cache = config.cache || 'render'; // imediate, render, never
+            var cache = config.cache || 'render'; // never, render, always
             if (cache === 'always') {
                 return this._asyncCached(fn);
             } else if (cache === 'never'){
@@ -73,9 +74,10 @@
             var asyncRender = function (text, render) {
                 var run = scope.runs[scope.renderRunId];
                 var methId = asyncRender._id + ':' + render(text);
+                run.scope[asyncRender._id] = run.scope[asyncRender._id] || {};
                 var call = run.calls[methId] = (run.calls[methId] ? run.calls[methId] + 1 : 1);
                 var key = methId + ':' + call;
-                if (!run.results[key]) {
+                if (!run.results.hasOwnProperty(key)) {
                     run.asyncInProgress = true;
                     var deferred = Q.defer();
                     fn(text, render,  function(err, data) {
@@ -84,13 +86,13 @@
                                 return deferred.reject(err);
                             } else {
                                 run.results[key] = '';
-                                return deferred.resolve('');
+                                return deferred.resolve(err);
                             }
                         } else {
                             run.results[key] = data;
                             return deferred.resolve(data);
                         }
-                    }, scope.renderRunId + ':' + asyncRender._id);
+                    }, { cache: run.scope[asyncRender._id], id: key });
                     return run.asyncPromises[key] = deferred.promise;
                 } else {
                     var result = run.results[key];
@@ -103,39 +105,51 @@
         },
 
         _asyncRenderCached: function (fn) {
-            var scope = this;
-            var async = scope._async(fn)();
-            var asyncRender = function (text, render) {
-                var run = scope.runs[scope.renderRunId];
-                var key = async._id + ':' + render(text) + ':1';
-                var result = run.results[key];
-                if (result) {
-                    return result;
-                } else {
-                    return run.asyncPromises[key] || async(text, render);
+            return this._async(function(text, render, callback, scope) {
+                var promise = scope.cache[text];
+                if (!promise) {
+                    var deferred = Q.defer();
+                    promise = scope.cache[text] = deferred.promise;
+                    fn(text, render, function(err, result) {
+                        if (err) {
+                            deferred.reject(err);
+                        } else {
+                            deferred.resolve(result);
+                        }
+                    }, scope);
                 }
-            }
-            return function () { return asyncRender };
+                promise.then(function(result) {
+                    callback(null, result);
+                }).fail(function (err) {
+                        callback(err);
+                    }
+                );
+            });
         },
 
         _asyncCached: function (fn) {
-            var scope = this;
-            var result;
             var promise;
-            var async = scope._async(fn)();
-            var asyncRender = function (text, render) {
-                if (result) {
-                    return result;
-                } else {
-                    promise = promise || async(text, render);
-                    // Rejections are handled in render
-                    return promise.then(function(data) {
-                        result = data;
-                        promise = null;
-                    });
+            return this._async(function(text, render, callback, scope) {
+                if (!promise) {
+                    var deferred = Q.defer();
+                    promise = deferred.promise;
+                    fn(text, render, function(err, result) {
+                        if (err) {
+                            deferred.reject(err);
+                        } else {
+                            deferred.resolve(result);
+                        }
+                    }, scope);
+
                 }
-            }
-            return function () { return asyncRender };
+                promise.then(function(result) {
+                    callback(null, result);
+                }).fail(function (err) {
+                        callback(err);
+                    }
+                );
+
+            });
         }
     };
 

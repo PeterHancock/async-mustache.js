@@ -5,14 +5,12 @@ var http = require('http');
 var view = {
     sync: 1,
     id: 4,
-    async: AsyncMustache.async(function(text, render, callback, key) {
-        console.log(key);
+    async: AsyncMustache.async(function(text, render, callback) {
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
     }, { cache:'render'}),
-    asyncCached: AsyncMustache.async(function(text, render, callback, key) {
-        console.log(key);
+    asyncCached: AsyncMustache.async(function(text, render, callback) {
         setTimeout(function() {
             callback(null, render(text));
         }, 0);
