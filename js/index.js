@@ -14,13 +14,15 @@
     AsyncMustache.prototype = {
 
         failOnError: false,
-        nextAsyncId: 1,
-        nextRenderId: 1,
+        
+        _nextAsyncId: 1,
+        
+        _nextRenderId: 1,
 
         render: function(template, view, partials) {
             var scope = this;
             var args = arguments;
-            var id = this.renderRunId = this.nextRenderId++;
+            var id = this.renderRunId = this._nextRenderId++;
             var run = this.runs[id] = {
                 promises: [],
                 methods: {},
@@ -72,7 +74,7 @@
                         runId: scope.renderRunId,
                         callCount: callCount
                     };
-                    fn.call(callScope, text, render, function(err, data) {
+                    fn.call(this, text, render, function(err, data) {
                         if (err) {
                             if (scope.failOnError) {
                                 return deferred.reject(err);
@@ -84,7 +86,7 @@
                             results[key] = data;
                             return deferred.resolve(data);
                         }
-                    });
+                    }, callScope);
                     run.promises.push(promise);
                     return promise;
                 } else {
@@ -93,23 +95,17 @@
                     return render(result);
                 }
             };
-            asyncRender._id = '' + (this.nextAsyncId++);
+            asyncRender._id = '' + (this._nextAsyncId++);
             return function () { return asyncRender };
         },
 
         _asyncRenderCached: function (fn) {
-            return this._async(function(text, render, callback) {
-                var promise = this.cache[text];
+            return this._async(function(text, render, callback, callScope) {
+                var promise = callScope.cache[text];
                 if (!promise) {
                     var deferred = Q.defer();
-                    promise = this.cache[text] = deferred.promise;
-                    fn.call(this, text, render, function(err, result) {
-                        if (err) {
-                            deferred.reject(err);
-                        } else {
-                            deferred.resolve(result);
-                        }
-                    });
+                    promise = callScope.cache[text] = deferred.promise;
+                    fn.call(callScope, text, render, deferred.makeNodeResolver(), callScope);
                 }
                 promise.then(function(result) {
                     callback(null, result);
@@ -122,17 +118,11 @@
 
         _asyncCached: function (fn) {
             var promise;
-            return this._async(function(text, render, callback) {
+            return this._async(function(text, render, callback, callScope) {
                 if (!promise) {
                     var deferred = Q.defer();
                     promise = deferred.promise;
-                    fn.call(this, text, render, function(err, result) {
-                        if (err) {
-                            deferred.reject(err);
-                        } else {
-                            deferred.resolve(result);
-                        }
-                    });
+                    fn.call(this, text, render, deferred.makeNodeResolver(), callScope);
 
                 }
                 promise.then(function(result) {
