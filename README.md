@@ -7,7 +7,7 @@ A wrapper around https://github.com/janl/mustache.js/ providing asyncronous view
 
 Node:
 
-```javacript
+```javascript
 Mustache = require('mustache');
 AsyncMustache = require('async-mustache')({mustache: Mustache});
 
