@@ -3,13 +3,13 @@
 
 A wrapper around https://github.com/janl/mustache.js/ providing asyncronous view functions
 
-## Simple Example
+## Usage
 
 Node:
 
 ```javascript
-Mustache = require('mustache');
-AsyncMustache = require('async-mustache')({mustache: Mustache});
+var Mustache = require('mustache');
+var AsyncMustache = require('async-mustache')({mustache: Mustache});
 
 var view = {
 	async: AsyncMustache.async(function (text, render, callback) {
@@ -19,13 +19,21 @@ var view = {
 	}))
 };
 
-AsyncMustache.render('{{#async}}{{/async}}').then(function (output) {
-	console.log(output);
+AsyncMustache.render('{{#async}}async-{{/async}}mustache.js', view).then(function (output) {
+	console.log(output); // async-mustache.js
 });
 ```
 
 Browser: 
-Remove the require statements from the Node example.
+
+```html
+<script src="mustache.js"></script>
+<script src="async-mustache.js"></script>
+<script>
+var asyncMustache = AsyncMustache({mustache: Mustache});
+//Usue it
+</script>
+```
 
 ## LICENSE
 
