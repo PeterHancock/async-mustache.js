@@ -24,18 +24,17 @@ AsyncMustache.render('{{#async}}async-{{/async}}mustache.js', view).then(functio
 });
 ```
 
-Browser: 
+Browser:
 
 ```html
 <script src="mustache.js"></script>
 <script src="async-mustache.js"></script>
 <script>
-var asyncMustache = AsyncMustache({mustache: Mustache});
-//Usue it
+var asyncMustache = require('async-mustache')({mustache: Mustache});
+//Use it
 </script>
 ```
 
 ## LICENSE
 
 MIT
-

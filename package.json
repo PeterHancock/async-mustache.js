@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Asyncronous view functions",
   "main": "js/index.js",
+
   "authors": [
     "Peter Hancock <peter.hancock@gmail.com>"
   ],
@@ -21,6 +22,6 @@
   },
   "scripts": {
     "test": "jasmine-node test",
-    "browser-build": "browserify js/index.js -s AsyncMustache > async-mustache.js"
+    "browser-build": "browserify -r ./js/index.js:async-mustache -s AsyncMustache > async-mustache.js"
   }
 }

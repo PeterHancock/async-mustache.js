@@ -1,8 +1,11 @@
 
+
 if (typeof module !== 'undefined' && module.exports) {
     AsyncMustache = require('../js/index.js');
     Mustache = require('mustache');
     Q = require('q');
+} else {
+    AsyncMustache = require('async-mustache');
 }
 
 describe("With default caching", function(done) {
@@ -55,7 +58,7 @@ describe("With default caching", function(done) {
       });
   });
 });
-  
+
 describe("Async function scope: ", function(done) {
     it("expect it to be the same object within render runs.", function(done) {
         var asyncMustache = AsyncMustache({mustache: Mustache});
