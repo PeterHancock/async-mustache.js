@@ -1,7 +1,7 @@
 {
   "name": "async-mustache.js",
   "main": "async-mustache.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/PeterHancock/async-mustache.js",
   "authors": [
     "Peter Hancock <peter.hancock@gmail.com>"

@@ -1,9 +1,8 @@
 {
   "name": "async-mustache",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Asyncronous view functions",
   "main": "js/index.js",
-
   "authors": [
     "Peter Hancock <peter.hancock@gmail.com>"
   ],
