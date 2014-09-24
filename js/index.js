@@ -92,7 +92,7 @@
                 } else {
                     var result = results[key];
                     delete method.results[key];
-                    return render(result);
+                    return result;
                 }
             };
             asyncRender._id = '' + (this._nextAsyncId++);

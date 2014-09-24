@@ -4,8 +4,6 @@ if (typeof module !== 'undefined' && module.exports) {
     AsyncMustache = require('../js/index.js');
     Mustache = require('mustache');
     Q = require('q');
-} else {
-    AsyncMustache = require('async-mustache');
 }
 
 describe("With default caching", function(done) {
