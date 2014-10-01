@@ -1,5 +1,6 @@
 # async-mustache.js - Asyncronous view functions
 
+[![NPM](https://nodei.co/npm/async-mustache.png)](https://nodei.co/npm/async-mustache/)
 
 A wrapper around https://github.com/janl/mustache.js/ providing asyncronous view functions
 
