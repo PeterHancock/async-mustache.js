@@ -1,4 +1,6 @@
-# async-mustache.js - Asyncronous view functions
+# async-mustache.js [![Build Status](https://travis-ci.org/PeterHancock/async-mustache.js.svg?branch=master)](https://travis-ci.org/PeterHancock/async-mustache.js)
+
+Asyncronous view functions
 
 [![NPM](https://nodei.co/npm/async-mustache.png)](https://nodei.co/npm/async-mustache/)
 
